@@ -514,6 +514,19 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
           AVAudioSession.Category.playAndRecord,
           options: [.defaultToSpeaker, .allowBluetooth, .allowBluetoothA2DP, .mixWithOthers])
         //            try self.audioSession.setMode(AVAudioSession.Mode.measurement)
+        // 🔹 Thêm đoạn này để chọn thiết bị ảo
+        if let availableInputs = audioSession.availableInputs {
+            if let virtualMic = availableInputs.first(where: { $0.portName.contains("BlackHole") }) {
+                do {
+                    try audioSession.setPreferredInput(virtualMic)
+                    print("✅ Using virtual mic: \(virtualMic.portName)")
+                } catch {
+                    print("❌ Failed to set virtual mic: \(error)")
+                }
+            } else {
+                print("⚠️ Virtual mic not found, using default input")
+            }
+        }
         if sampleRate > 0 {
           try self.audioSession.setPreferredSampleRate(Double(sampleRate))
         }
